@@ -1,0 +1,27 @@
+@page "/profile"
+@inject UserSessionService Session
+
+<div class="profile-card">
+    <img src="https://i.pravatar.cc/150?img=12" alt="Profile" class="profile-img" />
+    <h2>Alex Rivera</h2>
+    <p class="bio">Full-stack developer passionate about clean code and great UX.</p>
+
+    @if (Session.IsLoggedIn)
+    {
+        <span class="badge badge-logged">@Session.Email</span>
+        <span class="badge badge-role">@Session.Role</span>
+    }
+    else
+    {
+        <p><a href="/login">Sign in</a> to manage your portfolio.</p>
+    }
+</div>
+
+<style>
+    .profile-card { text-align: center; padding: 2rem; max-width: 400px; margin: auto; }
+    .profile-img  { width: 120px; height: 120px; border-radius: 50%; object-fit: cover; margin-bottom: 1rem; }
+    .bio          { color: #555; font-style: italic; }
+    .badge        { display: inline-block; padding: .25rem .6rem; border-radius: 999px; font-size: .8rem; margin: .2rem; }
+    .badge-logged { background: #d1fae5; color: #065f46; }
+    .badge-role   { background: #dbeafe; color: #1e40af; }
+</style>

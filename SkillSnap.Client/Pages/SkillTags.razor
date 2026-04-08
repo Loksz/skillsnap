@@ -1,0 +1,78 @@
+@page "/skills"
+@inject SkillService SkillService
+@inject UserSessionService Session
+
+<h2>Skills</h2>
+
+@if (_loading)
+{
+    <p>Loading skills...</p>
+}
+else if (_skills.Count == 0)
+{
+    <p>No skills found.</p>
+}
+else
+{
+    <div class="skill-tags">
+        @foreach (var s in _skills)
+        {
+            <span class="tag @LevelClass(s.Level)">@s.Name <small>@s.Level</small></span>
+        }
+    </div>
+}
+
+@if (Session.IsLoggedIn)
+{
+    <hr />
+    <h3>Add Skill</h3>
+    <div class="form-group">
+        <input @bind="_newName"  placeholder="Skill name" />
+        <select @bind="_newLevel">
+            <option value="Beginner">Beginner</option>
+            <option value="Intermediate">Intermediate</option>
+            <option value="Advanced">Advanced</option>
+        </select>
+        <button @onclick="AddSkill">Add</button>
+        @if (!string.IsNullOrEmpty(_message)) { <span class="msg">@_message</span> }
+    </div>
+}
+
+@code {
+    private List<SkillDto> _skills   = new();
+    private bool           _loading  = true;
+    private string         _newName  = string.Empty;
+    private string         _newLevel = "Intermediate";
+    private string         _message  = string.Empty;
+
+    protected override async Task OnInitializedAsync()
+    {
+        _skills  = await SkillService.GetSkillsAsync();
+        _loading = false;
+    }
+
+    private async Task AddSkill()
+    {
+        if (string.IsNullOrWhiteSpace(_newName)) return;
+        var ok = await SkillService.AddSkillAsync(new SkillDto { Name = _newName, Level = _newLevel, PortfolioUserId = 1 });
+        _message = ok ? "Skill added!" : "Error adding skill.";
+        if (ok) { _skills = await SkillService.GetSkillsAsync(); _newName = ""; }
+    }
+
+    private string LevelClass(string level) => level switch
+    {
+        "Advanced"     => "tag-green",
+        "Intermediate" => "tag-blue",
+        _              => "tag-gray"
+    };
+}
+
+<style>
+    .skill-tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+    .tag        { padding: .35rem .8rem; border-radius: 999px; font-size: .9rem; }
+    .tag-green  { background: #d1fae5; color: #065f46; }
+    .tag-blue   { background: #dbeafe; color: #1e40af; }
+    .tag-gray   { background: #f3f4f6; color: #374151; }
+    .form-group input, .form-group select { display: block; margin: .4rem 0; padding: .4rem; width: 100%; max-width: 300px; border: 1px solid #d1d5db; border-radius: 4px; }
+    .msg { color: #065f46; font-size: .9rem; }
+</style>

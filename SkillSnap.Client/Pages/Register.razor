@@ -1,0 +1,44 @@
+@page "/register"
+@inject AuthService AuthService
+@inject NavigationManager Nav
+
+<div class="auth-form">
+    <h2>Create Account</h2>
+
+    <input @bind="_fullName" placeholder="Full Name"  />
+    <input @bind="_email"    placeholder="Email"    type="email"    />
+    <input @bind="_password" placeholder="Password" type="password" />
+    <button @onclick="HandleRegister">Register</button>
+
+    @if (!string.IsNullOrEmpty(_message))
+    {
+        <p class="@(_success ? "success" : "error")">@_message</p>
+    }
+
+    <p>Already have an account? <a href="/login">Sign in</a></p>
+</div>
+
+@code {
+    private string _fullName = string.Empty;
+    private string _email    = string.Empty;
+    private string _password = string.Empty;
+    private string _message  = string.Empty;
+    private bool   _success  = false;
+
+    private async Task HandleRegister()
+    {
+        _message = string.Empty;
+        var ok = await AuthService.RegisterAsync(_fullName, _email, _password);
+        _success = ok;
+        _message = ok ? "Account created! You can now sign in." : "Registration failed. Check your data and try again.";
+        if (ok) Nav.NavigateTo("/login");
+    }
+}
+
+<style>
+    .auth-form { max-width: 360px; margin: 3rem auto; padding: 2rem; border: 1px solid #e5e7eb; border-radius: 8px; }
+    .auth-form h2 { margin-bottom: 1.5rem; }
+    .auth-form input { display: block; width: 100%; margin: .5rem 0; padding: .5rem; border: 1px solid #d1d5db; border-radius: 4px; }
+    .auth-form button { width: 100%; padding: .6rem; margin-top: .8rem; background: #059669; color: white; border: none; border-radius: 4px; cursor: pointer; }
+    .success { color: #065f46; } .error { color: #dc2626; }
+</style>
